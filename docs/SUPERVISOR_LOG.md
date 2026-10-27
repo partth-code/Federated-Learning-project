@@ -7,6 +7,7 @@
 - Publish the audited current tree as a new root commit on local `github-main`, tracking GitHub `main`. Preserve the original development history on local `main`; do not push that historical branch or force-push. Future publication should continue on `github-main` using ordinary fast-forward pushes.
 - Updated README to describe the current YOLO26/DP implementation and distinguish a fresh GitHub checkout from local weights/database/experiment state. Source, tests, UI references and historical summary JSON are included; `.env`, databases, media, model weights, training outputs and virtual environments remain local/ignored.
 - Latest code verification before publication: 74 tests passed and affected dashboard routes plus real CPU checkpoint inference verified in the preceding integration. Publication-only changes are documentation; whitespace/index checks and remote verification are performed separately.
+- Result: clean root commit `600f521a448680403b7988cdc02a05b4a64a0934` pushed to GitHub `main`; remote SHA matched local via `git ls-remote`. Published 135 files. Local `github-main` tracks `origin/main`; local `main` preserves development history at `78b464f`. No force-push or remote content replacement. Status: PUBLISHED; final publication-log update follows as an ordinary fast-forward documentation commit.
 
 ## User-supplied YOLO26 integration — 2026-10-27
 
