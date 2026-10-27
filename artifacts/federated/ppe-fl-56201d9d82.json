@@ -1,0 +1,99 @@
+{
+  "run_id": "ppe-fl-56201d9d82",
+  "timestamp": "2026-10-08T22:41:49.977286+00:00",
+  "status": "completed",
+  "workload": "Ultralytics YOLO11n Construction-PPE detection-head fine-tuning; not full-model federation",
+  "protocol": "Flower FedAvg; one local epoch and one aggregation round",
+  "simulated_sites": [
+    "factory-a",
+    "factory-b",
+    "factory-c"
+  ],
+  "site_train_images": {
+    "factory-a": 23,
+    "factory-b": 28,
+    "factory-c": 7
+  },
+  "site_class_instances": {
+    "factory-a": {
+      "0": 16,
+      "1": 21,
+      "2": 20,
+      "3": 22,
+      "4": 10,
+      "5": 25,
+      "6": 35,
+      "7": 9,
+      "8": 9,
+      "9": 3,
+      "10": 4
+    },
+    "factory-b": {
+      "0": 27,
+      "1": 32,
+      "2": 31,
+      "3": 37,
+      "4": 10,
+      "5": 21,
+      "6": 49,
+      "7": 18,
+      "8": 13,
+      "9": 20,
+      "10": 2
+    },
+    "factory-c": {
+      "0": 5,
+      "1": 2,
+      "2": 3,
+      "3": 0,
+      "4": 0,
+      "5": 4,
+      "6": 8,
+      "7": 5,
+      "8": 4,
+      "9": 5,
+      "10": 0
+    }
+  },
+  "partition_strategy": "dominant-class Dirichlet allocation",
+  "partition_seed": 20261009,
+  "fraction_per_site": 0.05,
+  "local_epochs": 1,
+  "rounds": 1,
+  "image_size": 320,
+  "device": "cpu",
+  "trainable_head_parameter_count": 432801,
+  "bytes_per_client_update": 1731204,
+  "client_fit_metrics": {
+    "factory-a_train_images": 23,
+    "factory-a_local_epochs": 1.0,
+    "factory-a_head_delta_l2": 0.959440791409005,
+    "factory-b_train_images": 28,
+    "factory-b_local_epochs": 1.0,
+    "factory-b_head_delta_l2": 1.0900922582832016,
+    "factory-c_train_images": 7,
+    "factory-c_local_epochs": 1.0,
+    "factory-c_head_delta_l2": 0.5089830274306473
+  },
+  "weight_updates_changed": true,
+  "global_head_delta_l2": 0.6980418750394738,
+  "global_model_sha256": "0066d98a0b7766cfbe4b090a136baf6c1878ca6620b3b66dce4bb7276a82fcc4",
+  "schema_sha256": "aaa529f5cc1dceed64de4b350a7fcc764a068448a7ebd2fd1d079ff2f7fbbd64",
+  "initial_test_metrics": {
+    "precision": 0.005289300232757014,
+    "recall": 0.10177804682779926,
+    "mAP50": 0.021211194304706804,
+    "mAP50_95": 0.007979303637561889
+  },
+  "post_federation_test_metrics": {
+    "precision": 0.0037768460665195723,
+    "recall": 0.1016444725369216,
+    "mAP50": 0.049002736081868406,
+    "mAP50_95": 0.023926580907658805
+  },
+  "model_artifact": "ppe-fl-56201d9d82.pt",
+  "model_version_id": "model-2c0e87bbf0",
+  "raw_training_images_sent": false,
+  "secure_aggregation": false,
+  "differential_privacy": false
+}

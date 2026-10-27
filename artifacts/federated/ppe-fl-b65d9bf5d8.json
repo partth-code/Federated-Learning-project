@@ -1,0 +1,87 @@
+{
+  "run_id": "ppe-fl-b65d9bf5d8",
+  "timestamp": "2026-10-08T22:23:31.669834+00:00",
+  "status": "invalid_no_client_weight_updates",
+  "weight_updates_changed": false,
+  "invalid_reason": "Ultralytics used its default nominal batch size of 64 with tiny client datasets and batch size 4, so gradient accumulation never reached an optimizer step.",
+  "workload": "Ultralytics YOLO11n Construction-PPE detection-head fine-tuning; not full-model federation",
+  "protocol": "Flower FedAvg; one local epoch and one aggregation round",
+  "simulated_sites": [
+    "factory-a",
+    "factory-b",
+    "factory-c"
+  ],
+  "site_train_images": {
+    "factory-a": 23,
+    "factory-b": 28,
+    "factory-c": 7
+  },
+  "site_class_instances": {
+    "factory-a": {
+      "0": 16,
+      "1": 21,
+      "2": 20,
+      "3": 22,
+      "4": 10,
+      "5": 25,
+      "6": 35,
+      "7": 9,
+      "8": 9,
+      "9": 3,
+      "10": 4
+    },
+    "factory-b": {
+      "0": 27,
+      "1": 32,
+      "2": 31,
+      "3": 37,
+      "4": 10,
+      "5": 21,
+      "6": 49,
+      "7": 18,
+      "8": 13,
+      "9": 20,
+      "10": 2
+    },
+    "factory-c": {
+      "0": 5,
+      "1": 2,
+      "2": 3,
+      "3": 0,
+      "4": 0,
+      "5": 4,
+      "6": 8,
+      "7": 5,
+      "8": 4,
+      "9": 5,
+      "10": 0
+    }
+  },
+  "partition_strategy": "dominant-class Dirichlet allocation",
+  "partition_seed": 20261009,
+  "fraction_per_site": 0.05,
+  "local_epochs": 1,
+  "rounds": 1,
+  "image_size": 320,
+  "device": "cpu",
+  "trainable_head_parameter_count": 432801,
+  "bytes_per_client_update": 1731204,
+  "schema_sha256": "aaa529f5cc1dceed64de4b350a7fcc764a068448a7ebd2fd1d079ff2f7fbbd64",
+  "initial_test_metrics": {
+    "precision": 0.005289300232757014,
+    "recall": 0.10177804682779926,
+    "mAP50": 0.021211194304706804,
+    "mAP50_95": 0.007979303637561889
+  },
+  "post_federation_test_metrics": {
+    "precision": 0.005289300232757014,
+    "recall": 0.10177804682779926,
+    "mAP50": 0.021211194304706804,
+    "mAP50_95": 0.007979303637561889
+  },
+  "model_artifact": "ppe-fl-b65d9bf5d8.pt",
+  "model_version_id": "model-b3d2b3f6a5",
+  "raw_training_images_sent": false,
+  "secure_aggregation": false,
+  "differential_privacy": false
+}

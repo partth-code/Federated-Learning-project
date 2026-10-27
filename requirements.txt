@@ -1,0 +1,11 @@
+# Milestone 1 baseline. Heavy ML/UI dependencies are added only after validation.
+python-dotenv>=1.0,<2
+pytest>=8,<10
+streamlit>=1.49,<2
+torch>=2.0,<3
+flwr>=1.39,<2
+opacus>=1.6,<2
+ultralytics>=8.3,<9
+opencv-python>=4.8,<5
+# Optional provider; the app falls back locally when no key/SDK is available.
+google-genai>=1.0,<2

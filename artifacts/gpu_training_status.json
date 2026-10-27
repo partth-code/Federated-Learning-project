@@ -1,0 +1,97 @@
+{
+  "status": "completed",
+  "run_name": "construction_ppe_gpu_20261009_011008",
+  "device": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "epochs_requested": 50,
+  "batch": 4,
+  "image_size": 512,
+  "fraction": 1.0,
+  "mode": "FULL TRAINING",
+  "torch": "2.11.0+cu128",
+  "updated_at": "2026-10-09T01:54:24.045268+00:00",
+  "epochs_completed": 51,
+  "validation_metrics": {
+    "metrics/precision(B)": 0.7354100361254529,
+    "metrics/recall(B)": 0.5139645262347792,
+    "metrics/mAP50(B)": 0.568956819085913,
+    "metrics/mAP50-95(B)": 0.2847109451355386
+  },
+  "best_artifact": "artifacts/runs/construction_ppe_gpu_20261009_011008/weights/best.pt",
+  "test_metrics": {
+    "metrics/precision(B)": 0.7089640944417076,
+    "metrics/recall(B)": 0.5103972841730468,
+    "metrics/mAP50(B)": 0.5357801213201334,
+    "metrics/mAP50-95(B)": 0.26938774706913854,
+    "fitness": 0.26938774706913854
+  },
+  "per_class_test_metrics": {
+    "helmet": {
+      "precision": 0.8970966200319732,
+      "recall": 0.921875,
+      "mAP50": 0.9286110053398258,
+      "mAP50-95": 0.4995848663682662
+    },
+    "gloves": {
+      "precision": 0.8644578238668255,
+      "recall": 0.7043018254280806,
+      "mAP50": 0.7405690128517506,
+      "mAP50-95": 0.3664539343477703
+    },
+    "vest": {
+      "precision": 0.8015575740773394,
+      "recall": 0.8426966292134831,
+      "mAP50": 0.8912324112372876,
+      "mAP50-95": 0.5839649347767724
+    },
+    "boots": {
+      "precision": 0.7128569863027947,
+      "recall": 0.6966824644549763,
+      "mAP50": 0.750751472376267,
+      "mAP50-95": 0.3861467757143446
+    },
+    "goggles": {
+      "precision": 0.8456280894003693,
+      "recall": 0.75,
+      "mAP50": 0.7902836893889845,
+      "mAP50-95": 0.3148664611642344
+    },
+    "none": {
+      "precision": 0.4959123172063849,
+      "recall": 0.49230769230769234,
+      "mAP50": 0.4300899937768089,
+      "mAP50-95": 0.1453399143568957
+    },
+    "Person": {
+      "precision": 0.74943899249256,
+      "recall": 0.809322033898305,
+      "mAP50": 0.81353619493307,
+      "mAP50-95": 0.5045289728191251
+    },
+    "no_helmet": {
+      "precision": 0.43991687433282695,
+      "recall": 0.25,
+      "mAP50": 0.22951116264711452,
+      "mAP50-95": 0.06691505360186369
+    },
+    "no_goggle": {
+      "precision": 0.7151021492388956,
+      "recall": 0.07821896335959842,
+      "mAP50": 0.18005916287419527,
+      "mAP50-95": 0.06193894038733747
+    },
+    "no_gloves": {
+      "precision": 0.27663761190881453,
+      "recall": 0.06896551724137931,
+      "mAP50": 0.12962154767529474,
+      "mAP50-95": 0.03128842920850336
+    },
+    "no_boots": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "mAP50": 0.00931568142086898,
+      "mAP50-95": 0.0022369350154108755
+    }
+  },
+  "model_version_id": "model-98f8352724",
+  "activated": false
+}

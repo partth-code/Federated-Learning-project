@@ -1,0 +1,15 @@
+{
+  "status": "compatible head-exchange adapter; PPE federation not run",
+  "mode": "experimental frozen-backbone detection-head boundary",
+  "checkpoint": "artifacts/runs/construction_ppe_demo/weights/best.pt",
+  "checkpoint_sha256": "4b42c90cb26756fcdc8ff837c35bf59afe7abed27cf8e1db923bd31152a0cb84",
+  "class_count": 11,
+  "trainable_head_parameter_count": 432801,
+  "full_model_parameter_count": 2591985,
+  "bytes_per_client_update": 1731204,
+  "schema_sha256": "aaa529f5cc1dceed64de4b350a7fcc764a068448a7ebd2fd1d079ff2f7fbbd64",
+  "training_rounds": 0,
+  "validation_metrics": null,
+  "secure_aggregation": false,
+  "differential_privacy": false
+}

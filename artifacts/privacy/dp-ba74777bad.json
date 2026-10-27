@@ -1,0 +1,13 @@
+{
+  "run_id": "dp-ba74777bad",
+  "mechanism": "Opacus DP-SGD",
+  "scope": "toy local client workload only; not PPE detector and not a SecAgg run",
+  "client_id": "factory-a",
+  "epochs": 2,
+  "noise_multiplier": 1.0,
+  "clipping_norm": 1.0,
+  "epsilon": 4.99460264989912,
+  "delta": 1e-05,
+  "last_loss": 0.48439282178878784,
+  "model_artifact": "dp-ba74777bad.pt"
+}

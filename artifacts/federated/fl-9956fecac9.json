@@ -1,0 +1,12 @@
+{
+  "run_id": "fl-9956fecac9",
+  "workload": "lightweight PyTorch classifier; not PPE detector",
+  "simulated_sites": ["factory-a", "factory-b", "factory-c"],
+  "rounds": 3,
+  "round_metrics": {"0": 0.7333333333333333, "1": 0.8083333333333333, "2": 0.8291666666666667, "3": 0.8416666666666667},
+  "loss_metrics": [[0, 0.5462920069694519], [1, 0.4659499228000641], [2, 0.42293649911880493], [3, 0.3935365080833435]],
+  "model_artifact": "fl-9956fecac9.pt",
+  "secure_aggregation": false,
+  "differential_privacy": false,
+  "model_version_id": "model-5218c24508"
+}

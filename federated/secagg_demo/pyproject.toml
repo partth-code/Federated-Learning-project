@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "safesight-secagg-demo"
+version = "0.1.0"
+description = "SafeSight-FL Flower SecAgg+ integration demonstration"
+license = {file = "LICENSE"}
+requires-python = ">=3.11,<3.14"
+dependencies = ["flwr[simulation]>=1.39,<2", "numpy>=1.26,<3"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["safesight_secagg"]
+
+[tool.flwr.app]
+publisher = "safesight-local"
+fab-format-version = 1
+flwr-version-target = "1.39.0"
+
+[tool.flwr.app.components]
+serverapp = "safesight_secagg.server_app:app"
+clientapp = "safesight_secagg.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 2
+num-clients = 3
+local-epochs = 2
+learning-rate = 0.15
+num-shares = 3
+reconstruction-threshold = 2
+max-weight = 1000.0
+clipping-range = 8.0
+quantization-range = 4194304
+modulus-range = 4294967296
+timeout = 120.0
+
+
+#######################################################################
+# CONFIGURATION MIGRATION NOTICE:
+#
+# What was previously called "federation config" for SuperLink
+# connections in pyproject.toml has been renamed and moved.
+#
+# These settings are now **SuperLink connection configuration**
+# and are defined in the Flower configuration file.
+#
+# The entries below are commented out intentionally and are kept
+# only as a migration reference.
+#
+# Docs: https://flower.ai/docs/framework/ref-flower-configuration.html
+#######################################################################
+
+# [tool.flwr.federations]
+# default = "local-simulation"
+
+# [tool.flwr.federations.local-simulation]
+# options.num-supernodes = 3

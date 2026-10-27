@@ -1,0 +1,99 @@
+{
+  "run_id": "dp-fl-37f8627e0a",
+  "workload": "Flower Opacus toy classifier; not PPE detector",
+  "status": "completed",
+  "rounds": 2,
+  "simulated_sites": [
+    "factory-a",
+    "factory-b",
+    "factory-c"
+  ],
+  "differential_privacy": true,
+  "secure_aggregation": false,
+  "secure_rng": false,
+  "mechanism": "Opacus DP-SGD",
+  "accountant": "RDP",
+  "config": {
+    "epochs": 1,
+    "noise_multiplier": 1.0,
+    "clipping_norm": 1.0,
+    "delta": 1e-05
+  },
+  "scope": "Experimental example-level DP within each simulated client; not client-level DP or PPE DP; separate runs not composed",
+  "raw_training_data_sent": false,
+  "private_training_metrics_sent": false,
+  "bytes_per_client_update": 24,
+  "model_artifact": "dp-fl-37f8627e0a.pt",
+  "model_sha256": "7b8a6a8afb2780940aea95ecedfd2c47ac406c464027ce79e953a9af07de6f9f",
+  "accounting": [
+    {
+      "round": 1,
+      "clients": [
+        {
+          "round": 1,
+          "epsilon": 4.544477029165507,
+          "site_id": "factory-a",
+          "sample_rate": 0.2,
+          "delta": 1e-05,
+          "steps": 5
+        },
+        {
+          "round": 1,
+          "epsilon": 4.544477029165507,
+          "site_id": "factory-b",
+          "sample_rate": 0.2,
+          "delta": 1e-05,
+          "steps": 5
+        },
+        {
+          "round": 1,
+          "epsilon": 4.544477029165507,
+          "site_id": "factory-c",
+          "sample_rate": 0.2,
+          "delta": 1e-05,
+          "steps": 5
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "clients": [
+        {
+          "round": 2,
+          "epsilon": 5.75368863276605,
+          "site_id": "factory-a",
+          "sample_rate": 0.2,
+          "delta": 1e-05,
+          "steps": 10
+        },
+        {
+          "round": 2,
+          "epsilon": 5.75368863276605,
+          "site_id": "factory-b",
+          "sample_rate": 0.2,
+          "delta": 1e-05,
+          "steps": 10
+        },
+        {
+          "round": 2,
+          "epsilon": 5.75368863276605,
+          "site_id": "factory-c",
+          "sample_rate": 0.2,
+          "delta": 1e-05,
+          "steps": 10
+        }
+      ]
+    }
+  ],
+  "accuracy": {
+    "0": 0.7333333333333333,
+    "1": 0.8208333333333333,
+    "2": 0.8333333333333334
+  },
+  "loss": {
+    "0": 0.5462920069694519,
+    "1": 0.4541819989681244,
+    "2": 0.39268478751182556
+  },
+  "model_version_id": "model-ff48bf929b"
+}

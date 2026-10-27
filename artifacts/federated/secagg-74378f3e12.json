@@ -1,0 +1,26 @@
+{
+  "run_id": "secagg-74378f3e12",
+  "timestamp": "2026-10-08T20:39:48.104791+00:00",
+  "workload": "NumPy linear classifier with deterministic synthetic non-IID data; not PPE detector",
+  "protocol": "Flower SecAgg+ (`SecAggPlusWorkflow` + `secaggplus_mod`)",
+  "secure_aggregation": true,
+  "differential_privacy": false,
+  "simulated_sites": [
+    "factory-a",
+    "factory-b",
+    "factory-c"
+  ],
+  "rounds": [
+    {
+      "round": 1.0,
+      "loss": 0.7414441861408647,
+      "accuracy": 0.3125
+    },
+    {
+      "round": 2.0,
+      "loss": 0.6327969293597968,
+      "accuracy": 0.6708333333333333
+    }
+  ],
+  "server_visibility": "Server strategy receives the aggregate after SecAgg+ unmasking; individual client updates are masked by the protocol."
+}
