@@ -1,5 +1,19 @@
 # Test report — Milestone 21 system verification
 
+## Latest: OpenCV webcam zone test — 2026-10-27
+
+- Added a direct local OpenCV camera path for live zone-preview testing. With no model, the operator moves a labeled synthetic marker across the real zone-transition tracker; it is not person detection.
+- With a compatible PPE artifact, the same camera path can be switched to model tracking and passes tracked-person centers/IDs into that tracker. Neither preview mode persists incidents or evidence.
+- Unit tests cover left→danger→left transitions for both synthetic and model-supplied tracks. Streamlit AppTest with a mocked OpenCV capture verified start, live-frame rendering, marker movement/event display, and stop/release without opening camera hardware.
+- Physical-camera capture and actual model throughput on a live feed were not verified in the automated environment.
+
+## Latest: isolated simulated zone UI — 2026-10-27
+
+- Added a deterministic left→danger→left test state available without a local PPE artifact. It reuses the actual vertical transition tracker but generates synthetic visuals only; no model, SQLite incident rows, analytics values, local evidence, audit events, or sync queue items are produced.
+- Simulation helper test passed and verifies two events, seven annotated frames, and the simulated danger duration.
+- Streamlit AppTest selected Simulated zone demo and ran it: seven images and two event rows rendered with zero exceptions. The UI explicitly identifies all generated content as simulated and session-only.
+- Real PPE model mode remains a separate choice and still requires a valid, activated local artifact.
+
 ## Latest: experimental vertical zone transitions — 2026-10-27
 
 - 20 focused video, geometry, incident, analytics, and integration tests passed. The available regression suite passed 58 tests when the five Flower/Opacus-dependent test modules were excluded. Changed Python files compiled, and `git diff --check` passed.

@@ -393,3 +393,21 @@ Only one milestone is advanced after the current milestone's tests pass. Any fai
 - Verification: 20 focused video/geometry/incident/analytics/integration tests passed; the available regression suite passed 58 tests with the five Flower/Opacus-dependent modules excluded; changed Python modules compiled; `git diff --check` passed. Streamlit AppTest rendered Overview, Incidents (Camera/Event type/Severity filters), and Live Detection with no exceptions. No local model artifact was present, so actual model-backed dashboard recording was not exercised.
 - Full-suite status: collection cannot run under the configured Python 3.13 environment because `flwr` and `opacus` are missing. No dependency installation was attempted; focused tests and dashboard checks passed without them.
 - Status: PARTIAL FEATURE ADVANCE — sampled local two-zone transitions, persistence, lifecycle and dashboard visibility are implemented and verified with test doubles; live media/model performance and all continuously running camera behavior remain unverified/not implemented.
+
+## Isolated simulated zone UI — 2026-10-27
+
+- Request: provide a separate dummy state to exercise the new zone UI while the real PPE artifact is unavailable, with a clear path back to real inference when enabled.
+- Files changed: `edge/zone_demo.py`, `dashboard/app.py`, `tests/test_zone_demo.py`, README, demo/test documentation, and this log.
+- Implemented: Live Detection offers distinct **Simulated zone demo** and **Real PPE model** sources. Without a local artifact, the simulated mode is the default. It runs a deterministic synthetic left→danger→left movement through the real zone-transition state logic and displays explicitly synthetic annotated frames and event history.
+- Isolation: simulation data exists only in Streamlit session state. It creates no detector outputs, SQLite incidents, analytics data, evidence files, audit entries, or sync queue items. Selecting Real PPE model requires a compatible active local artifact; there is no silent fallback from real inference to simulation.
+- Verification: simulator test passed; Streamlit AppTest rendered seven simulated frames and two event rows with zero exceptions. Focused zone tests, compile check, and diff whitespace check passed. The previous tracked project data was not modified.
+- Status: COMPLETE for isolated UI simulation; actual model inference remains gated on a real PPE artifact.
+
+## Live OpenCV webcam zone test — 2026-10-27
+
+- Request: test the zone feature with a separate live camera while no PPE model is available, and make the later switch to model-driven person tracks a UI selection rather than another feature implementation.
+- Implemented **OpenCV webcam** as a distinct Live Detection source. It reads local frames via OpenCV, overlays the zone boundary, and lets the operator move a visibly synthetic person marker using left/right controls. The marker positions pass through the same `VerticalZoneTransitionTracker` used by the real video path.
+- When a compatible local PPE checkpoint is available, the same source offers **Real PPE model** processing. It calls the active model's persistent tracking on each webcam frame and feeds model-supplied person track IDs/positions into the same tracker. Without an artifact this option is not offered; no synthetic marker is presented as model output.
+- Camera frames and transition previews remain session-only; neither mode writes incidents, evidence, audit, analytics, or sync records. Stop and leaving the page release the OpenCV capture.
+- Tests: synthetic webcam-frame transitions and model-track transitions both verified against the shared tracker using generated local test frames. Streamlit AppTest used a mocked OpenCV capture to verify webcam start, live-frame rendering, synthetic movement, event display, and stop/release without accessing physical camera hardware. A physical webcam was not available for verification in this automated run.
+- Status: implemented for local OpenCV webcam preview and source switching; live camera hardware/model performance remains unverified, and this is not production safety monitoring.
