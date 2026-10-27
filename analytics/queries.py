@@ -47,7 +47,9 @@ def safety_analytics(db_path: Path, start: str, end: str, *, site_id: str | None
     types = Counter(r["event_type"] for r in rows)
     decisions = Counter(r["feedback"] for r in rows)
     counts = {"total": len(rows), "ppe_violations": types["ppe_violation"],
-              "zone_events": types["zone_intrusion"] + types["zone_loitering"] + types["restricted_zone_intrusion"],
+              "zone_events": (types["zone_intrusion"] + types["zone_loitering"]
+                              + types["restricted_zone_intrusion"] + types["DANGER_ZONE_ENTRY"]
+                              + types["LEFT_ZONE_ENTRY"]),
               **{key: decisions[key] for key in ("confirmed", "false_positive", "uncertain")}}
     counts["unreviewed_or_other"] = len(rows) - sum(counts[k] for k in ("confirmed", "false_positive", "uncertain"))
     days = Counter(r["day"] for r in rows)
@@ -59,7 +61,10 @@ def safety_analytics(db_path: Path, start: str, end: str, *, site_id: str | None
         counter = Counter(str(r[field] or "unknown") for r in rows)
         groups[field] = [{field: key, "alerts": count} for key, count in
                          sorted(counter.items(), key=lambda pair: (-pair[1], pair[0]))]
-    supported = {key: types[key] for key in ("ppe_violation", "zone_intrusion", "zone_loitering", "restricted_zone_intrusion") if types[key]}
+    supported = {key: types[key] for key in (
+        "ppe_violation", "zone_intrusion", "zone_loitering", "restricted_zone_intrusion",
+        "DANGER_ZONE_ENTRY", "LEFT_ZONE_ENTRY",
+    ) if types[key]}
     top = max(supported.values(), default=0)
     return {"counts": counts, "daily": trend, "groups": groups,
             "most_common_alert_types": sorted(k for k, v in supported.items() if v == top),

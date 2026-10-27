@@ -1,5 +1,12 @@
 # Test report — Milestone 21 system verification
 
+## Latest: experimental vertical zone transitions — 2026-10-27
+
+- 20 focused video, geometry, incident, analytics, and integration tests passed. The available regression suite passed 58 tests when the five Flower/Opacus-dependent test modules were excluded. Changed Python files compiled, and `git diff --check` passed.
+- Tests cover per-track entry/return confirmation, independent IDs, boundary hysteresis, temporary detection loss, first-observed-in-danger suppression, video timestamps, transition idempotency, exit duration, persistent lifecycle updates, local evidence, offline metadata queueing, audit-chain integrity, and zone analytics.
+- Streamlit AppTest rendered Overview, Incidents (Camera/Event type/Severity filters), and Live Detection without exceptions. The workspace has no active local model artifact, so Live Detection showed its disabled state; actual model-backed dashboard recording was not exercised.
+- Full-suite collection was blocked because the configured Python 3.13 environment lacks `flwr` and `opacus`; no unrelated dependency installation was attempted.
+
 ## Latest: user-supplied YOLO26 integration — 2026-10-27
 
 - 74 tests passed; compilation and whitespace checks passed. New checks cover supplied class aliases, no false negative-class conversion, retained generic-model rejection, and manifest scoping to registry version/workspace.

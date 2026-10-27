@@ -47,9 +47,9 @@ The evaluation page is the source of current local state. If a metric or artifac
 
 Open **Operations → Live Detection**. If permissions and a local model are ready, capture a webcam still, upload an authorized still image, or upload an authorized clip. Video sampling is local at one frame per second for up to 30 seconds. Show only boxes/labels returned by the actual model; the upload remains in local session memory until cleared/closed, the decoder's temporary disk copy is removed, and only sampled still evidence is retained when an explicitly selected violation is saved.
 
-If a supported violation is really produced, inspect it and save only the sampled-frame event you intend to review; then record a review decision only if you can genuinely assess it. PPE events are not deduplicated across time. Optionally enable the experimental normalized-polygon zone tracker for uploaded clips and show only actual person-ID transitions; one-second sampling can miss events and is not reliable monitoring. Otherwise, do not manufacture an incident: explain that the returned prediction did not meet the event rule or that input/model is unavailable. Continuous video/RTSP processing is not implemented.
+If a supported violation is really produced, inspect it and save only the sampled-frame event you intend to review; then record a review decision only if you can genuinely assess it. PPE events are not deduplicated across time. For a permitted uploaded clip, optionally enable the experimental vertical left/danger-zone transition rule. Confirmed transitions are recorded automatically after sampling; inspect their clip offsets, annotated snapshots, and active/resolved lifecycle on Incidents. Sampling defaults to one second and is configurable from 0.25–5 seconds, but only the first 30 seconds are processed; sparse sampling can miss events and is not reliable monitoring. The prior normalized-polygon option remains available for an explicitly selected entry. Otherwise, do not manufacture an incident: explain that the returned prediction did not meet the event rule or that input/model is unavailable. Continuous video/RTSP processing and pause/resume controls are not implemented.
 
-If zone mode is enabled, explain that the polygon is normalized to the displayed frame and that an entry is only flagged after an observed outside-to-inside transition with a real model-provided person track ID. A person first seen inside the zone does not trigger an entry.
+If vertical left/danger mode is enabled, explain that it samples at the configured interval, uses a configurable vertical boundary, hysteresis, two consecutive observations, and model-provided anonymous track IDs. An occupant first seen in the danger zone does not trigger an entry; a confirmed return resolves a matching entry record. These are experimental sampled-clip rules, not a live safety system. If polygon mode is enabled instead, an entry is flagged only after an observed outside-to-inside transition; a person first seen inside does not trigger an entry.
 
 Open **Human Feedback** and describe Confirmed / False Positive / Uncertain as reviewer feedback. If the database has no review records, show the empty state; do not seed fake rows.
 
@@ -71,7 +71,7 @@ Open **Audit Integrity**. Run/show verification against the actual local chain a
 
 Show the federation connectivity setting and explain: “Local processing and SQLite continue offline. Incident metadata is queued; after reconnect, a user can manually send allowlisted metadata to a configured authenticated receiver. There is no automatic sender.” If the loopback receiver is configured and running, click the explicit sync button and show the actual acknowledgement/count. Otherwise, show the pending count and say no receiver is configured. Do not imply the loopback demo is a real factory deployment.
 
-Close with: “The next research steps are improving PPE model quality, replicating the head-only federation experiment at larger scale, evaluating PPE-specific privacy mechanisms, connecting continuous tracking/video to restricted zones, and validating with independent sites. We report the gaps rather than substituting mock values.”
+Close with: “The next research steps are improving PPE model quality, replicating the head-only federation experiment at larger scale, evaluating PPE-specific privacy mechanisms, validating continuous tracking/video, and testing with independent sites. The sampled left/danger-zone workflow is experimental and can miss transitions; we report the gaps rather than substituting mock values.”
 
 ## Optional extra minute
 
@@ -80,7 +80,7 @@ If time allows, open **Model Versions** to show the recorded model kind/clients 
 ## Fallback order
 
 1. Webcam still snapshot, only if operator permission and camera work.
-2. An authorized local image or video. The dashboard supports bounded sampled-frame video review; continuous streaming remains unavailable. The CLI adapter accepts a local video source.
+2. An authorized local image or video. The dashboard supports bounded sampled-frame video review and an experimental automatic zone-transition mode; continuous streaming remains unavailable. The CLI adapter accepts a local video source.
 3. Saved manifest/run summaries and honest empty UI states. Static imagery is not a substitute for a model prediction; do not draw mock boxes or claim an incident.
 
 No legal prerecorded PPE video is currently bundled. If a suitable clip is later added, record its source and license in `THIRD_PARTY.md` before demo use.

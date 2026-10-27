@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
@@ -12,9 +12,11 @@ from detector.contracts import Detection
 from edge.video_inference import (
     VideoFrameResult,
     VideoZoneEntry,
+    VideoZoneTransition,
     analyze_local_video,
     record_selected_video_frame,
     record_selected_video_zone_entry,
+    record_video_zone_transitions,
 )
 
 
@@ -101,6 +103,7 @@ class _CV2:
     CAP_PROP_FPS = 1
     CAP_PROP_FRAME_COUNT = 2
     INTER_AREA = 3
+    FONT_HERSHEY_SIMPLEX = 4
 
     def __init__(self):
         self.capture = _Capture(self)
@@ -120,6 +123,22 @@ class _CV2:
     @staticmethod
     def polylines(_image, _points, _closed, _color, _thickness):
         return None
+
+    @staticmethod
+    def rectangle(image, *_args):
+        return image
+
+    @staticmethod
+    def line(image, *_args):
+        return image
+
+    @staticmethod
+    def putText(image, *_args):
+        return image
+
+    @staticmethod
+    def addWeighted(_overlay, _alpha, image, _beta, _gamma):
+        return image.copy()
 
 
 class _TrackedBox:
@@ -225,6 +244,61 @@ def test_zone_tracking_does_not_claim_entry_when_first_seen_inside(monkeypatch, 
     assert not any(frame.zone_entries for frame in result.frames)
 
 
+def test_vertical_zone_tracking_confirms_entry_and_return(monkeypatch, tmp_path):
+    monkeypatch.setitem(sys.modules, "cv2", _CV2())
+    model = _TrackingModel([
+        [0, 0, 2, 2],
+        [10, 4, 14, 8],
+        [10, 4, 14, 8],
+        [0, 0, 2, 2],
+        [0, 0, 2, 2],
+        [0, 0, 2, 2],
+        [0, 0, 2, 2],
+        [0, 0, 2, 2],
+    ])
+
+    result = analyze_local_video(
+        tmp_path / "clip.mp4",
+        model,
+        interval_seconds=0.5,
+        zone_boundary=0.5,
+        zone_hysteresis=0.02,
+    )
+
+    transitions = [
+        (frame.elapsed_seconds, transition)
+        for frame in result.frames
+        for transition in frame.zone_transitions
+    ]
+    assert [(item.current_zone, item.elapsed_seconds) for _, item in transitions] == [
+        ("RIGHT", 1.0),
+        ("LEFT", 2.0),
+    ]
+    assert transitions[1][1].danger_duration_seconds == 1.0
+    assert result.frames[0].tracked_zones == (("7", "LEFT"),)
+    assert result.frames[2].tracked_zones == (("7", "RIGHT"),)
+    assert result.zone_boundary == 0.5
+
+
+def test_vertical_zone_tracking_does_not_invent_entry_for_first_danger_observation(monkeypatch, tmp_path):
+    monkeypatch.setitem(sys.modules, "cv2", _CV2())
+    model = _TrackingModel([
+        [10, 4, 14, 8],
+        [10, 4, 14, 8],
+        [0, 0, 2, 2],
+        [0, 0, 2, 2],
+    ])
+
+    result = analyze_local_video(
+        tmp_path / "clip.mp4",
+        model,
+        interval_seconds=1.0,
+        zone_boundary=0.5,
+    )
+
+    assert not any(frame.zone_transitions for frame in result.frames)
+
+
 def test_selected_video_frame_creates_local_incident_and_metadata_only_queue(tmp_path):
     db_path = init_db(tmp_path / "demo.sqlite3")
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -289,3 +363,82 @@ def test_selected_zone_entry_creates_audited_local_event(tmp_path):
         payload = json.loads(conn.execute("SELECT payload_json FROM sync_queue").fetchone()[0])
         assert payload["event_type"] == "restricted_zone_intrusion"
         assert "evidence" not in payload
+
+
+def test_vertical_zone_events_are_persistent_idempotent_and_resolve_entry(tmp_path):
+    db_path = init_db(tmp_path / "demo.sqlite3")
+    timestamp = datetime.now(timezone.utc).isoformat()
+    exit_timestamp = (datetime.fromisoformat(timestamp) + timedelta(seconds=5)).isoformat()
+    person = Detection("person", 0.88, (10, 4, 14, 8), timestamp, track_id="7")
+    returning_person = Detection("person", 0.88, (0, 4, 2, 8), exit_timestamp, track_id="7")
+    entry = VideoZoneTransition(person, "LEFT", "RIGHT", 1.0)
+    exit_transition = VideoZoneTransition(returning_person, "RIGHT", "LEFT", 2.0, 1.0)
+    entry_frame = VideoFrameResult(2, 1.0, (person,), b"annotated entry", b"raw entry", zone_transitions=(entry,))
+    exit_frame = VideoFrameResult(4, 2.0, (person,), b"annotated return", b"raw return", zone_transitions=(exit_transition,))
+    args = {
+        "db_path": db_path,
+        "site_id": "factory-a",
+        "camera_id": "factory-a-camera-1",
+        "evidence_dir": tmp_path / "evidence",
+        "federation_online": False,
+        "source_key_prefix": "video-digest",
+    }
+
+    first = record_video_zone_transitions(frame=entry_frame, **args)
+    returned = record_video_zone_transitions(frame=exit_frame, **args)
+    assert len(first) == len(returned) == 1
+    assert first[0].event_type == "DANGER_ZONE_ENTRY"
+    assert returned[0].event_type == "LEFT_ZONE_ENTRY"
+    assert len(record_video_zone_transitions(frame=entry_frame, **args)) == 0
+    assert len(record_video_zone_transitions(frame=exit_frame, **args)) == 0
+    init_db(db_path)
+    with sqlite3.connect(db_path) as conn:
+        rows = conn.execute(
+            """SELECT event_type, video_timestamp_seconds, zone_status,
+            zone_duration_seconds, zone_exited_at, previous_zone, current_zone
+            FROM incidents ORDER BY video_timestamp_seconds"""
+        ).fetchall()
+        assert rows[0][0:4] == ("DANGER_ZONE_ENTRY", 1.0, "resolved", 1.0)
+        assert rows[0][4] == exit_timestamp
+        assert rows[0][5:] == ("LEFT", "RIGHT")
+        assert rows[1][0:4] == ("LEFT_ZONE_ENTRY", 2.0, "resolved", 1.0)
+        assert conn.execute("SELECT COUNT(*) FROM sync_queue").fetchone()[0] == 2
+        assert conn.execute("SELECT COUNT(*) FROM audit_logs WHERE event_type='incident.created'").fetchone()[0] == 2
+        assert conn.execute("SELECT COUNT(*) FROM audit_logs WHERE event_type='incident.zone_resolved'").fetchone()[0] == 1
+    from analytics.queries import safety_analytics
+
+    assert safety_analytics(db_path, timestamp[:10], exit_timestamp[:10])["counts"]["zone_events"] == 2
+    from audit.hash_chain import verify_chain
+
+    assert verify_chain(db_path)[0]
+    saved = sorted((tmp_path / "evidence").glob("*.jpg"))
+    assert len(saved) == 2
+    assert b"annotated" in saved[0].read_bytes() or b"annotated" in saved[1].read_bytes()
+
+
+def test_existing_incidents_table_migrates_for_transition_metadata(tmp_path):
+    db_path = tmp_path / "legacy.sqlite3"
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """CREATE TABLE incidents (
+                event_id TEXT PRIMARY KEY, site_id TEXT NOT NULL, camera_id TEXT NOT NULL,
+                event_type TEXT NOT NULL, timestamp TEXT NOT NULL, person_id TEXT,
+                confidence REAL, ppe_status TEXT, zone_id TEXT, zone_entered_at TEXT,
+                zone_duration_seconds REAL, status TEXT NOT NULL DEFAULT 'open',
+                feedback TEXT, evidence_path TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )"""
+        )
+
+    init_db(db_path)
+
+    with sqlite3.connect(db_path) as conn:
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(incidents)")}
+    assert {
+        "previous_zone",
+        "current_zone",
+        "video_timestamp_seconds",
+        "zone_exited_at",
+        "zone_status",
+        "severity",
+        "source_key",
+    }.issubset(columns)

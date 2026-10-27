@@ -6,14 +6,14 @@ SafeSight-FL is a final-year prototype for exploring workplace PPE monitoring wi
 
 ## One-minute pitch
 
-Manual CCTV review can miss safety events, while collecting camera footage centrally creates data-governance, storage, and bandwidth concerns. SafeSight-FL explores a local-first workflow: a PPE-trained model processes images/video samples locally; a supported violation may become a structured incident; a human can review it; and local evidence/actions can be audited. One bounded Flower FedAvg round and one separate Flower SecAgg+ round each exchanged only the PPE detection head across three simulated clients; toy classifier-FL/SecAgg+ and Opacus DP-SGD runs are separate. A local PPE version can be activated or rolled back from the registry. The current detector's held-out metrics remain very weak; there is no continuous dashboard stream, and offline delivery requires a manually configured authenticated receiver. Those gaps are visible in our documentation and UI.
+Manual CCTV review can miss safety events, while collecting camera footage centrally creates data-governance, storage, and bandwidth concerns. SafeSight-FL explores a local-first workflow: a PPE-trained model processes images/video samples locally; a supported violation may become a structured incident; a human can review it; and local evidence/actions can be audited. The uploaded-video demo now has an experimental vertical left/danger split that automatically records confirmed sampled-frame transitions and resolves an entry when a tracked person is observed returning left. One bounded Flower FedAvg round and one separate Flower SecAgg+ round each exchanged only the PPE detection head across three simulated clients; toy classifier-FL/SecAgg+ and Opacus DP-SGD runs are separate. A local PPE version can be activated or rolled back from the registry. The current detector's held-out metrics remain very weak; there is no continuous dashboard stream, and offline delivery requires a manually configured authenticated receiver. Those gaps are visible in our documentation and UI.
 
 ## Problem and scope
 
 - Problem: manual monitoring can miss PPE violations or restricted-zone entry; central footage collection can increase privacy, bandwidth, storage, and governance burden.
 - Proposed direction: keep raw training images at each client and exchange model information through federation, with privacy controls applied to the actual training workload.
 - Built scope: local PPE dataset inspection and a short training/evaluation path; bounded head-only PPE FedAvg and SecAgg+ rounds; image/snapshot and bounded uploaded-video review; feedback, local evidence, SQLite, audit chain, and dashboard; experimental sampled-video person/zone tracking; separate toy Flower and Opacus demonstrations.
-- Out of scope for current claims: production surveillance, independent factory deployment, reliable safety decisions, full-model PPE federation, PPE DP-SGD or combined PPE DP+SecAgg, continuous video/RTSP, and automatic or remote-site queue synchronization.
+- Out of scope for current claims: production surveillance, independent factory deployment, reliable safety decisions, full-model PPE federation, PPE DP-SGD or combined PPE DP+SecAgg, continuous video/RTSP, reliable zone tracking, pause/resume processing, and automatic or remote-site queue synchronization.
 
 ## Why these methods?
 
@@ -34,7 +34,7 @@ Manual CCTV review can miss safety events, while collecting camera footage centr
 - **SIMULATED:** Factory A/B/C are deterministic logical partitions/clients on one machine. They are not independent factories or separate networked organizations.
 - **EXPERIMENTAL / weak:** the initial PPE run used one epoch, 2% of training data, and 320px input; a separate one-round federated head-only update used a nominal 5% per client, rounded up to whole images, at 320px. Its test mAP@0.5:0.95 changed 0.00798 → 0.02393, but final precision was 0.00378 and results are not safety-performance evidence.
 - **REUSED:** third-party packages and documented Flower APIs/examples are attributed in `THIRD_PARTY.md`; the Construction-PPE dataset is external and is not redistributed here. The two community repositories in the reuse plan remain reference-only; no code or weights were copied from them.
-- **EXPERIMENTAL / NOT PRODUCTION-VERIFIED:** PPE head-only SecAgg+ was exercised on one machine; person tracking and polygon entries use one-frame-per-second uploaded-video samples, so IDs may be unstable and transitions may be missed. **NOT IMPLEMENTED / NOT VERIFIED:** full-model PPE federation, PPE DP-SGD, DP+SecAgg composition, continuous dashboard video/RTSP, automatic queue synchronization, production security, and deployment at independent sites.
+- **EXPERIMENTAL / NOT PRODUCTION-VERIFIED:** PPE head-only SecAgg+ was exercised on one machine; vertical and polygon zone rules use uploaded-video samples at a configurable interval (one second by default), so IDs may be unstable and transitions may be missed. **NOT IMPLEMENTED / NOT VERIFIED:** full-model PPE federation, PPE DP-SGD, DP+SecAgg composition, continuous dashboard video/RTSP, pause/resume controls, dwell alerts, automatic queue synchronization, production security, and deployment at independent sites.
 
 ## Project contribution and limitations
 
@@ -43,8 +43,8 @@ Our contribution is the integration and honest scope separation: dataset manifes
 Important limitations to volunteer before being asked:
 
 1. The PPE model is far too weak for a real safety workflow; it may miss events or return false alarms.
-2. Dashboard detection accepts a webcam still snapshot, uploaded still image, or uploaded clip sampled once per second for up to 30 seconds. PPE predictions are frame-level. An optional experimental tracker can flag observed polygon entries only when it returns person IDs; sparse sampling may miss transitions and this is not reliable monitoring.
-3. The sampled-video tracker is experimental and low-rate; it is not a continuous or production-validated live tracker.
+2. Dashboard detection accepts a webcam still snapshot, uploaded still image, or uploaded clip sampled at a configurable interval for up to 30 seconds. PPE predictions are frame-level. The experimental vertical tracker automatically records confirmed transitions when it returns person IDs; sparse sampling may miss transitions and this is not reliable monitoring.
+3. The sampled-video tracker is experimental and low-rate; its transition log is automatic within the analyzed clip, but it is not continuous or production-validated.
 4. No legal prerecorded PPE demo clip is bundled.
 5. The PPE head-only FedAvg and SecAgg+ runs are small simulated integration tests. The SecAgg+ run protects aggregation from the Flower ServerApp's view, but local staging is on one shared machine; it is not DP and is not an independent-factory deployment. The Opacus DP run is a separate toy workload.
 6. Offline incident metadata remains queued until a user explicitly invokes the authenticated sender. The included receiver is loopback-only; no remote receiver is configured, and no background sync runs.
@@ -84,7 +84,7 @@ Local image/video-sample processing and SQLite persistence do not depend on fede
 The prototype integration, local review/audit workflow, dataset/training evidence, and clearly scoped privacy/federation demonstrations—not a new FL, DP, or SecAgg algorithm.
 
 **What would you do next?**
-Improve and validate the PPE model on legally usable held-out data; repeat the head-only federation experiment over more clients/rounds; evaluate PPE-specific privacy mechanisms; connect continuous tracking/video and zone events; and validate deployment and sync with independent sites.
+Improve and validate the PPE model on legally usable held-out data; repeat the head-only federation experiment over more clients/rounds; evaluate PPE-specific privacy mechanisms; validate continuous tracking/video and sampled zone events; and validate deployment and sync with independent sites.
 
 ## Seven-minute live demo plan
 

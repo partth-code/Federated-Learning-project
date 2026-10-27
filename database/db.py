@@ -35,6 +35,13 @@ CREATE TABLE IF NOT EXISTS incidents (
     zone_id TEXT,
     zone_entered_at TEXT,
     zone_duration_seconds REAL,
+    previous_zone TEXT,
+    current_zone TEXT,
+    video_timestamp_seconds REAL,
+    zone_exited_at TEXT,
+    zone_status TEXT,
+    severity TEXT,
+    source_key TEXT,
     status TEXT NOT NULL DEFAULT 'open',
     feedback TEXT,
     evidence_path TEXT,
@@ -122,10 +129,18 @@ def init_db(db_path: Path, *, reset: bool = False) -> Path:
             "zone_id": "TEXT",
             "zone_entered_at": "TEXT",
             "zone_duration_seconds": "REAL",
+            "previous_zone": "TEXT",
+            "current_zone": "TEXT",
+            "video_timestamp_seconds": "REAL",
+            "zone_exited_at": "TEXT",
+            "zone_status": "TEXT",
+            "severity": "TEXT",
+            "source_key": "TEXT",
         }
         for column, column_type in migrations.items():
             if column not in existing_columns:
                 conn.execute(f"ALTER TABLE incidents ADD COLUMN {column} {column_type}")
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_incidents_source_key ON incidents(source_key) WHERE source_key IS NOT NULL")
         version_columns = {row[1] for row in conn.execute("PRAGMA table_info(model_versions)")}
         version_migrations = {
             "model_kind": "TEXT NOT NULL DEFAULT 'unspecified'",
@@ -178,22 +193,34 @@ def list_sites(db_path: Path) -> list[dict[str, object]]:
         return [dict(row) for row in conn.execute("SELECT * FROM sites ORDER BY site_id")]
 
 
-def insert_incident(db_path: Path, incident: object) -> None:
+def insert_incident(db_path: Path, incident: object) -> bool:
     payload = incident.to_dict()
     with sqlite3.connect(db_path) as conn:
-        conn.execute(
-            """INSERT INTO incidents(
+        try:
+            conn.execute(
+                """INSERT INTO incidents(
                 event_id, site_id, camera_id, event_type, timestamp, person_id,
                 confidence, ppe_status, zone_id, zone_entered_at,
-                zone_duration_seconds, status, feedback, evidence_path, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            tuple(payload[field] for field in (
-                "event_id", "site_id", "camera_id", "event_type", "timestamp",
-                "person_id", "confidence", "ppe_status", "zone_id", "zone_entered_at",
-                "zone_duration_seconds", "status", "feedback", "evidence_path", "created_at",
-            )),
-        )
+                zone_duration_seconds, status, feedback, evidence_path, created_at,
+                previous_zone, current_zone, video_timestamp_seconds, zone_exited_at,
+                zone_status, severity, source_key
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                tuple(payload[field] for field in (
+                    "event_id", "site_id", "camera_id", "event_type", "timestamp",
+                    "person_id", "confidence", "ppe_status", "zone_id", "zone_entered_at",
+                    "zone_duration_seconds", "status", "feedback", "evidence_path", "created_at",
+                    "previous_zone", "current_zone", "video_timestamp_seconds", "zone_exited_at",
+                    "zone_status", "severity", "source_key",
+                )),
+            )
+        except sqlite3.IntegrityError:
+            if payload["source_key"] and conn.execute(
+                "SELECT 1 FROM incidents WHERE source_key = ?", (payload["source_key"],)
+            ).fetchone():
+                return False
+            raise
     append_audit(db_path, "incident.created", {"event_id": payload["event_id"], "event_type": payload["event_type"], "site_id": payload["site_id"]})
+    return True
 
 
 def count_rows(db_path: Path, table: str) -> int:

@@ -24,6 +24,13 @@ class Incident:
     feedback: str | None = None
     evidence_path: str | None = None
     created_at: str = ""
+    previous_zone: str | None = None
+    current_zone: str | None = None
+    video_timestamp_seconds: float | None = None
+    zone_exited_at: str | None = None
+    zone_status: str | None = None
+    severity: str | None = None
+    source_key: str | None = None
 
     def __post_init__(self) -> None:
         if not self.created_at:

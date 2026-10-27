@@ -28,8 +28,8 @@ The project investigates a local-first design: each site processes its own image
 |---|---|---|
 | Dataset Explorer | Reads a local YOLO dataset manifest, class labels, split counts, and deterministic non-IID simulated-site partitions; displays annotated samples when the local root is configured. | Images remain outside Git. Factory partitions are simulated. |
 | PPE model | Validated adapter with YOLO11 training history and imported YOLO26 support, class normalization and local activation/rollback. | The imported 8-class model detects PPE presence; it has no explicit missing-PPE classes. Its imported validation metrics are not local test results. Weights are local-only. |
-| Local detection | Dashboard accepts a webcam **snapshot**, still image, or uploaded video clip. Video is sampled locally at one frame per second for up to the first 30 seconds; a reviewer explicitly selects qualifying sampled-frame results before incidents are recorded. The CLI adapter also accepts a local image or video source. | No continuous webcam/RTSP stream or production-validated tracking. Sparse experimental person tracking can miss zone transitions. PPE video incidents are frame-level and are not deduplicated. Upload bytes remain in local Streamlit session memory until cleared/closed; the decoder's temporary disk copy is removed after analysis. |
-| Restricted zones | Normalized polygon configuration and tracked-person zone-entry persistence are tested. The uploaded-video path can optionally run the model tracker on sampled frames and expose observed outside-to-inside entries for explicit review. | Experimental one-frame-per-second tracking only; initial-in-zone observations are suppressed, missed transitions/unstable IDs remain possible, and no continuous/RTSP tracker exists. |
+| Local detection | Dashboard accepts a webcam **snapshot**, still image, or uploaded video clip. Video sampling defaults to one second and is configurable from 0.25–5 seconds, capped to the first 30 seconds. A reviewer explicitly selects qualifying sampled-frame PPE results before they are recorded. An optional vertical left/danger-zone mode automatically records confirmed person transitions from sampled frames. The CLI adapter also accepts a local image or video source. | No continuous webcam/RTSP stream, pause/resume controls, or production-validated tracking. Sparse experimental person tracking can miss zone transitions. PPE video incidents remain frame-level and are not deduplicated. Upload bytes remain in local Streamlit session memory until cleared/closed; the decoder's temporary disk copy is removed after analysis. |
+| Restricted zones | Experimental vertical split defaults to 50% frame width, with configurable boundary/hysteresis and two-sample transition confirmation. It stores `DANGER_ZONE_ENTRY`, records an observed return as `LEFT_ZONE_ENTRY`, and resolves the matching local entry record with video offset/dwell duration and an annotated still. The existing normalized-polygon option remains available. | Initial observations in the danger zone do not create an entry; temporary missed detections do not by themselves create a transition. Sparse samples, short clips, weak detection, and unstable/reused tracker IDs can still miss or misattribute transitions. This is not a continuous tracker or operational alerting. |
 | Incidents and feedback | Supported model-returned PPE violations can be stored as typed incidents. Human review supports Confirmed, False Positive, or Uncertain. | A detection can be missed; a review action is not ground truth unless a reviewer actually verifies it. |
 | Evidence and audit | Qualifying image evidence is stored locally; incident/review actions are appended to a SHA-256 hash-chain audit log. | The audit chain is tamper-evident, not a blockchain or proof against every attacker. |
 | Offline operation | Local detection and SQLite recording continue without federation connectivity. Incident metadata is queued locally; a manually triggered authenticated sender can deliver allowlisted metadata to a configured receiver and requires an acknowledgement before marking items synced. | No automatic/background send. Remote delivery requires a separately configured HTTPS receiver; the included demo receiver binds only to loopback. Images are never queued or sent. |
@@ -71,8 +71,9 @@ Local webcam snapshot, still image, or sampled video frame
                  │                               └── explicit authenticated sync (optional)
                  │
                  └── optional sampled-video tracker
-                     └── normalized polygon rule
-                         (experimental; no continuous stream)
+                     ├── vertical left/danger transition rule (experimental)
+                     └── normalized polygon rule (experimental)
+                         (no continuous stream)
 
 PPE head-only experiments (not full YOLO federation):
   Flower FedAvg ───────────► 3 simulated clients, one round
@@ -146,6 +147,12 @@ python scripts/run_ppe_inference.py <local-image-or-video> --model artifacts/run
 ```
 
 Dataset inspection reads the path supplied on the command line. The demo training script is fixed to a short one-epoch, 2%-fraction CPU run; it is not a full-training launcher and should not be presented as one. The Ultralytics dataset configuration includes an upstream download URL; review its terms before allowing any download. Inference output contains only detections returned by the configured PPE model; a generic COCO person detector is not accepted as a helmet/vest detector.
+
+### Experimental sampled-video zone demo
+
+Launch the existing dashboard with `python -m streamlit run dashboard/app.py`, choose **Live Detection → Upload video**, select **Experimental automatic left/danger transitions**, then click **Analyze video locally**. The frame-sampling interval defaults to one second; the boundary defaults to 50% and can be adjusted. Confirmed tracked-person transitions are stored locally without manually selecting each transition. The **Incidents** page shows entry/return events, active/resolved state, clip offsets, elapsed danger-zone duration, filters, and saved local snapshots.
+
+Use only a clip you are permitted to process. This experiment analyzes at most the first 30 seconds; it does not provide live webcam/CCTV streaming, Start/Pause/Resume/Stop controls, dwell alerts, or reliable safety monitoring. Initial observations already in the danger zone are not treated as entries. No sample video is bundled, and no movement event is created from a still image.
 
 ### Federated learning and privacy demonstrations
 
